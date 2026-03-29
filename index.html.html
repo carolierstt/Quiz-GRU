@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quiz GRU Airport — Estágio 5.0</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;background:linear-gradient(135deg,#E8006A 0%,#C4005A 55%,#00AEAE 100%);display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',sans-serif;padding:16px}
+  .card{background:#fff;border-radius:24px;padding:28px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2)}
+  .label{font-size:11px;font-weight:700;letter-spacing:2px;color:#00AEAE;text-transform:uppercase;margin-bottom:4px}
+  .title{font-size:24px;font-weight:800;background:linear-gradient(135deg,#E8006A,#00AEAE);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
+  .sub{font-size:12px;color:#bbb;margin-bottom:18px}
+  .welcome{background:linear-gradient(135deg,#E8006A11,#00AEAE11);border:1.5px solid #E8006A33;border-radius:16px;padding:14px 16px;margin-bottom:18px}
+  .welcome-title{font-size:14px;font-weight:800;color:#E8006A;margin-bottom:6px}
+  .welcome-text{font-size:12px;color:#555;line-height:1.7}
+  input{width:100%;padding:12px 16px;border-radius:12px;border:2px solid #e0e0e0;font-size:15px;margin-bottom:12px;outline:none}
+  input:focus{border-color:#E8006A}
+  .btn{width:100%;padding:14px;border:none;border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:8px;background:linear-gradient(135deg,#E8006A,#00AEAE);color:#fff}
+  .btn-out{width:100%;padding:12px;border:2px solid #E8006A;border-radius:14px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;background:transparent;color:#E8006A}
+  .info-box{margin-top:14px;background:#f9f9f9;border-radius:12px;padding:12px;font-size:12px;color:#888;line-height:1.6}
+  .error{color:#f44336;font-size:13px;margin-bottom:8px;padding:10px;background:#ffebee;border-radius:10px}
+  .badge{border-radius:20px;padding:4px 12px;font-size:13px;font-weight:700;display:inline-block;color:#fff}
+  .badges{display:flex;justify-content:space-between;margin-bottom:8px}
+  .progress-wrap{height:8px;border-radius:4px;background:#eee;overflow:hidden;margin-bottom:16px}
+  .progress-bar{height:100%;border-radius:4px;transition:width 1s linear}
+  .question{font-size:16px;font-weight:700;margin-bottom:18px;color:#2d2d2d;line-height:1.5}
+  .opt{padding:13px 16px;border-radius:14px;margin-bottom:10px;cursor:pointer;border:2px solid #e8e8f0;background:#f9f9ff;font-weight:600;font-size:14px;color:#2d2d2d;transition:all .15s}
+  .opt:hover{border-color:#E8006A;background:#fce4ec}
+  .opt.correct{border-color:#00AEAE;background:#e0f7f7}
+  .opt.wrong{border-color:#f44336;background:#ffebee}
+  .opt.neutral{opacity:.6}
+  .streak{display:inline-block;background:#FF9800;color:#fff;border-radius:20px;padding:4px 14px;font-size:13px;font-weight:700;margin-bottom:10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .stat-box{background:#f8f9ff;border-radius:14px;padding:14px;text-align:center}
+  .stat-icon{font-size:22px}
+  .stat-val{font-size:20px;font-weight:800;color:#E8006A}
+  .stat-label{font-size:11px;color:#aaa}
+  .rank-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;margin-bottom:8px;border:1px solid #eee;background:#fafafa}
+  .rank-row.top{background:#fff9e6;border-color:#f0d080}
+  .rank-medal{font-size:22px;min-width:30px;text-align:center}
+  .rank-name{font-weight:700;font-size:14px}
+  .rank-plays{font-size:11px;color:#aaa}
+  .rank-pts{font-weight:800;font-size:17px;color:#E8006A;margin-left:auto}
+  .empty{text-align:center;padding:40px;color:#aaa}
+  .big-emoji{font-size:52px;text-align:center;margin-bottom:8px}
+  .remaining{background:#f0f9f9;border-radius:12px;padding:12px;font-size:12px;color:#555;margin-bottom:14px}
+  .screen{display:none}
+  .screen.active{display:block}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- HOME -->
+  <div id="home" class="screen active">
+    <div class="label">Programa de Estágio 5.0</div>
+    <div class="title">✈️ Quiz GRU Airport</div>
+    <div class="sub">Ciclo 2026 • Ranking Anual</div>
+    <div class="welcome">
+      <div class="welcome-title">A pista está liberada. ✈️</div>
+      <div class="welcome-text">
+        Todos os dias, novos destinos são traçados aqui na GRU. Este quiz é a sua oportunidade de demonstrar as competências que vão definir a sua rota profissional.<br><br>
+        Cada pergunta é um <b>checkpoint da sua jornada</b>. Responda com atenção, velocidade e protagonismo. <b>Assuma o controle da própria carreira.</b>
+      </div>
+    </div>
+    <input id="inp-name" placeholder="Seu nome completo" />
+    <input id="inp-email" placeholder="Seu e-mail corporativo" type="email"/>
+    <div id="home-error" class="error" style="display:none"></div>
+    <button class="btn" onclick="startGame()">🛫 Iniciar Decolagem</button>
+    <button class="btn-out" onclick="showRanking()">🏆 Ver Ranking Anual</button>
+    <div class="info-box"><b style="color:#00AEAE">Como funciona:</b> 10 perguntas sobre as 6 competências do seu Passaporte. Quanto mais rápido e mais acertos em sequência, mais pontos! Limite de 3 partidas por dia. Os pontos acumulam no ranking anual. 🎯</div>
+  </div>
+
+  <!-- PLAYING -->
+  <div id="playing" class="screen">
+    <div class="badges">
+      <span class="badge" id="q-counter" style="background:#E8006A"></span>
+      <span class="badge" id="q-timer" style="background:#00AEAE"></span>
+      <span class="badge" id="q-score" style="background:#00AEAE"></span>
+    </div>
+    <div id="streak-bar" style="display:none" class="streak"></div>
+    <div class="progress-wrap"><div class="progress-bar" id="prog"></div></div>
+    <div class="question" id="q-text"></div>
+    <div id="opts"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result" class="screen">
+    <div class="big-emoji" id="res-emoji"></div>
+    <div class="title" style="text-align:center">Partida encerrada!</div>
+    <div class="sub" style="text-align:center;margin-bottom:16px" id="res-name"></div>
+    <div class="grid2" id="res-stats"></div>
+    <div class="remaining" id="res-remaining"></div>
+    <button class="btn" onclick="playAgain()">🔄 Jogar Novamente</button>
+    <button class="btn-out" onclick="showRanking()">🏆 Ver Ranking</button>
+  </div>
+
+  <!-- RANKING -->
+  <div id="ranking" class="screen">
+    <div class="title">🏆 Ranking 2026</div>
+    <div class="sub">Pontuação acumulada no ano</div>
+    <div id="rank-list"></div>
+    <button class="btn-out" onclick="show('home')">← Voltar</button>
+  </div>
+
+</div>
+
+<script>
+// ===================== CONFIGURAÇÃO =====================
+// Cole aqui a URL do seu Google Apps Script após seguir o tutorial
+const SHEET_URL = "COLE_SUA_URL_AQUI";
+// ========================================================
+
+const QUESTIONS_PER_ROUND = 10;
+const TIME_PER_Q = 20;
+const MAX_PLAYS = 3;
+const MAX_PTS = 100;
+const STREAK_BONUS = 15;
+
+const ALL_QUESTIONS = [
+  // ORIENTAÇÃO AO CLIENTE
+  {q:"Você recebeu uma tarefa do seu gestor, mas não entendeu completamente o que era esperado. O que você faz?",opts:["Executa do jeito que entendeu para não parecer despreparado","Pergunta ao gestor para esclarecer antes de começar","Pede para um colega fazer no lugar","Deixa para depois esperando mais informações"],ans:1},
+  {q:"Um colega de outra área pediu sua ajuda com uma demanda urgente fora do seu escopo. Como você age?",opts:["Ignora, pois não é sua responsabilidade","Ouve a necessidade e tenta ajudar dentro do possível, comunicando seu gestor","Reclama que tem muitas tarefas","Resolve sem avisar ninguém"],ans:1},
+  {q:"Você entregou um trabalho e o gestor apontou que não estava no padrão esperado. O que você faz?",opts:["Argumenta que fez o melhor possível","Pede desculpas, anota o feedback e refaz com atenção aos pontos levantados","Culpa a falta de instruções claras","Entrega novamente sem alterações"],ans:1},
+  {q:"Qual comportamento melhor demonstra orientação ao cliente interno?",opts:["Entregar rápido sem revisar","Fazer perguntas para entender bem a necessidade antes de executar","Esperar o cliente reclamar para agir","Demorar para entregar mas avisar apenas no prazo final"],ans:1},
+  {q:"Você percebe que vai entregar uma demanda com qualidade inferior ao esperado. O que é mais adequado?",opts:["Entregar assim mesmo e esperar o feedback","Comunicar antecipadamente ao solicitante e alinhar o que é possível entregar","Não entregar e dizer que não recebeu a tarefa","Pedir para outro estagiário assinar a entrega"],ans:1},
+  {q:"Um passageiro da GRU te aborda perdido no aeroporto, mesmo não sendo sua função atendê-lo. O que você faz?",opts:["Diz que não é sua área e segue em frente","Orienta o passageiro ou encaminha para quem pode ajudar","Finge não ter visto","Diz que está ocupado"],ans:1},
+  {q:"O que diferencia uma entrega com qualidade de uma entrega apenas concluída?",opts:["A entrega com qualidade é mais demorada","A entrega com qualidade atende às expectativas com atenção aos detalhes","Não há diferença","A entrega concluída é sempre suficiente"],ans:1},
+  {q:"Você tem dúvida sobre o prazo de entrega de uma tarefa. O que faz?",opts:["Estipula um prazo sozinho sem comunicar","Confirma o prazo com o solicitante antes de começar","Entrega quando terminar, independente do prazo","Ignora o prazo e foca na qualidade"],ans:1},
+
+  // FOCO EM RESULTADO
+  {q:"Você tem três tarefas com prazos próximos. Como organiza?",opts:["Faz a mais fácil primeiro","Avalia urgência e importância de cada uma e define uma ordem de execução","Faz todas ao mesmo tempo","Pede para o gestor escolher"],ans:1},
+  {q:"Você percebe que não vai conseguir entregar uma tarefa no prazo combinado. O que faz?",opts:["Entrega atrasado sem avisar","Comunica o gestor assim que percebe o risco, explicando o motivo","Abandona a tarefa","Pede para um colega assumir sem avisar o gestor"],ans:1},
+  {q:"O que melhor representa foco em resultado no ambiente de estágio?",opts:["Fazer o mínimo necessário para não ser cobrado","Comprometer-se com as entregas e buscar concluí-las com qualidade","Evitar tarefas difíceis","Só trabalhar quando o gestor está presente"],ans:1},
+  {q:"Você terminou sua principal tarefa mais cedo que o previsto. O que faz?",opts:["Descansa até o próximo prazo","Avisa o gestor e pergunta se pode contribuir com outra demanda","Sai mais cedo","Navega na internet"],ans:1},
+  {q:"Um projeto que você lidera atrasa por um imprevisto externo. Como você age?",opts:["Culpa o imprevisto e não toma nenhuma ação","Replana as atividades e comunica os impactados sobre o novo prazo","Desiste do projeto","Esconde o atraso do gestor"],ans:1},
+  {q:"Qual atitude demonstra comprometimento com as entregas?",opts:["Entregar sempre no último segundo","Revisar o trabalho antes de entregar para garantir qualidade","Entregar o que for possível sem se preocupar com o resultado","Delegar tudo para outros"],ans:1},
+  {q:"Você recebeu uma meta de aprendizado para o trimestre. Como age?",opts:["Espera o gestor cobrar para se preocupar","Cria um plano pessoal para atingir a meta e acompanha seu progresso","Acredita que vai conseguir sem se planejar","Ignora a meta"],ans:1},
+
+  // VISÃO SISTÊMICA
+  {q:"Você percebe que uma atividade sua impacta negativamente o trabalho de outro setor. O que faz?",opts:["Continua do jeito que está, pois é responsabilidade do outro setor resolver","Comunica o problema e busca alinhar uma solução conjunta","Espera o outro setor reclamar","Finge que não percebeu"],ans:1},
+  {q:"Por que é importante entender como outras áreas da GRU funcionam?",opts:["Para poder criticar o trabalho dos outros","Para compreender como suas atividades impactam o todo e colaborar melhor","Não é importante, cada um cuida do seu","Para ganhar mais tarefas"],ans:1},
+  {q:"Seu gestor pede que você participe de uma reunião de outra área. Qual é a melhor postura?",opts:["Participar apenas fisicamente sem se engajar","Participar com atenção, fazer perguntas e registrar aprendizados","Recusar, pois não é sua área","Ficar no celular durante a reunião"],ans:1},
+  {q:"O que significa ter visão sistêmica no ambiente profissional?",opts:["Focar apenas nas suas tarefas","Entender como suas ações afetam outras pessoas, processos e resultados","Conhecer todos os sistemas de TI da empresa","Evitar depender de outras áreas"],ans:1},
+  {q:"Você identifica uma melhoria no processo da sua área que beneficiaria outros setores. O que faz?",opts:["Guarda a ideia para si","Registra a ideia e compartilha com seu gestor","Implementa sozinho sem comunicar ninguém","Descarta por achar que não é seu papel"],ans:1},
+  {q:"Como a GRU Airport se posiciona no contexto do transporte aéreo brasileiro?",opts:["É um aeroporto regional de pequeno porte","É o maior aeroporto da América Latina em movimentação de passageiros e cargas","É apenas um hub de conexões domésticas","É especializado em cargas internacionais"],ans:1},
+  {q:"Ao receber uma nova tarefa, qual é a primeira pergunta que demonstra visão sistêmica?",opts:["Quanto tempo vou levar para fazer isso?","Como essa entrega impacta o processo e quem depende dela?","Posso passar isso para outro?","Quando é o prazo mínimo?"],ans:1},
+
+  // PROTAGONISMO PROFISSIONAL
+  {q:"Você terminou suas tarefas e tem tempo livre. O que faz?",opts:["Fica ocioso esperando novas ordens","Busca aprendizados, lê sobre a área ou pergunta ao gestor como pode contribuir","Vai embora mais cedo","Conversa sobre assuntos pessoais"],ans:1},
+  {q:"Seu gestor te dá um feedback negativo sobre sua postura. Como você reage?",opts:["Fica na defensiva e justifica seu comportamento","Ouve com atenção, agradece e reflete sobre como melhorar","Ignora o comentário","Fica desmotivado e reduz o desempenho"],ans:1},
+  {q:"O que é protagonismo profissional no contexto do Estágio 5.0?",opts:["Fazer o que mandam sem questionar","Ter postura ativa no próprio desenvolvimento e responsabilidade pelas tarefas assumidas","Ser o mais falante da equipe","Tomar decisões sem consultar o gestor"],ans:1},
+  {q:"Você identifica um problema recorrente na sua área. Qual é a atitude protagonista?",opts:["Espera alguém mais experiente resolver","Registra o problema, analisa causas e propõe uma solução ao gestor","Reclama com os colegas","Ignora por não ser sua responsabilidade direta"],ans:1},
+  {q:"Você tem dificuldade com uma ferramenta importante para o trabalho. O que faz?",opts:["Evita usar a ferramenta","Busca aprender por conta própria e pede ajuda quando necessário","Pede para outro fazer sempre que precisar","Espera um treinamento formal"],ans:1},
+  {q:"Qual comportamento NÃO representa protagonismo profissional?",opts:["Buscar feedback para melhorar","Assumir responsabilidade pelas tarefas","Esperar sempre que digam o que fazer","Demonstrar iniciativa com melhorias"],ans:2},
+  {q:"Você discorda de uma orientação do seu gestor. Como age?",opts:["Faz do seu jeito sem falar nada","Expressa sua opinião de forma respeitosa e, após ouvir a justificativa, segue a orientação","Recusa a fazer a tarefa","Faz a tarefa reclamando com os colegas"],ans:1},
+  {q:"Como o Estágio 5.0 da GRU espera que o estagiário encare seu desenvolvimento?",opts:["Como uma obrigação passiva","Como uma jornada ativa onde ele é o protagonista da própria carreira","Como responsabilidade exclusiva do gestor","Como algo que acontece naturalmente sem esforço"],ans:1},
+
+  // PLANEJAMENTO E ORGANIZAÇÃO
+  {q:"Como você garante que não vai esquecer um prazo importante?",opts:["Confia na memória","Registra em uma lista ou agenda e revisa periodicamente","Espera o gestor lembrar","Anota em papéis soltos"],ans:1},
+  {q:"Você recebe várias tarefas ao mesmo tempo. Qual é o primeiro passo?",opts:["Começa a primeira que aparecer","Lista todas as tarefas, identifica prazos e prioridades antes de começar","Pede para o gestor decidir qual fazer primeiro","Faz todas ao mesmo tempo"],ans:1},
+  {q:"O que é mais eficiente para administrar o tempo no trabalho?",opts:["Trabalhar sem pausas até terminar tudo","Planejar o dia com prioridades definidas e fazer pequenas revisões ao longo do expediente","Fazer as tarefas mais curtas primeiro sempre","Responder e-mails o dia todo"],ans:1},
+  {q:"Você percebe que está acumulando tarefas pendentes. Qual é a melhor atitude?",opts:["Ignora e espera a situação se resolver","Reorganiza as prioridades e comunica o gestor se necessário","Pede demissão do estágio","Faz tudo de qualquer jeito para limpar a lista"],ans:1},
+  {q:"Qual ferramenta simples pode ajudar a organizar suas atividades diárias?",opts:["Não usar nenhuma ferramenta","Uma lista de tarefas com prazos e status atualizada diariamente","Depender da memória","Usar apenas o e-mail como referência"],ans:1},
+  {q:"Como o planejamento prévio impacta a qualidade das entregas?",opts:["Não impacta, o importante é a velocidade","Permite antecipar problemas, organizar recursos e entregar com mais qualidade","Atrasa o início das tarefas","É perda de tempo"],ans:1},
+
+  // RELACIONAMENTO INTERPESSOAL
+  {q:"Um colega comete um erro que afeta seu trabalho. Como você age?",opts:["Reclama para todos da equipe","Conversa diretamente com o colega de forma respeitosa e busca uma solução","Vai imediatamente ao gestor reclamar","Ignora e refaz o trabalho sozinho sem comunicar"],ans:1},
+  {q:"Em uma reunião de equipe, você discorda de uma ideia apresentada. O que faz?",opts:["Não fala nada mas fica insatisfeito","Espera o momento certo e expressa sua opinião de forma construtiva","Interrompe quem está falando para criticar","Sai da reunião"],ans:1},
+  {q:"O que caracteriza uma comunicação profissional no ambiente de trabalho?",opts:["Usar gírias e linguagem informal em todos os momentos","Ser claro, objetivo e respeitoso, adaptando a linguagem ao contexto","Evitar comunicar-se para não gerar conflitos","Falar muito para demonstrar conhecimento"],ans:1},
+  {q:"Um novo estagiário chegou na equipe e parece perdido. O que você faz?",opts:["Ignora, cada um por si","Se apresenta, oferece ajuda e compartilha informações úteis sobre a rotina","Espera o gestor resolver","Comenta com outros colegas sobre as dificuldades do novo"],ans:1},
+  {q:"Como você deve se comportar ao receber uma crítica de um colega mais experiente?",opts:["Rebater imediatamente","Ouvir com atenção, agradecer e avaliar se faz sentido aplicar o aprendizado","Ignorar completamente","Levar para o lado pessoal"],ans:1},
+  {q:"Qual postura fortalece o trabalho em equipe?",opts:["Competir com os colegas para se destacar individualmente","Colaborar, compartilhar informações e apoiar quando necessário","Trabalhar sempre sozinho","Evitar depender dos colegas"],ans:1},
+  {q:"Você está em desacordo com uma decisão tomada pela equipe. O que faz?",opts:["Sabota a execução da decisão","Expressa seu ponto de vista antes da decisão e, uma vez definida, colabora com o time","Faz do seu jeito ignorando o grupo","Reclama com pessoas de fora da equipe"],ans:1},
+  {q:"O que a GRU valoriza em relação à diversidade e inclusão?",opts:["Que todos pensem da mesma forma","Ambientes plurais que geram decisões mais inteligentes e organizações mais inovadoras","Que apenas os mais experientes opinem","Que diferenças sejam evitadas"],ans:1},
+];
+
+let state = {
+  name:"", email:"", questions:[], qIdx:0, score:0, streak:0,
+  answers:[], timeLeft:TIME_PER_Q, timer:null, answered:false,
+  playerData:null
+};
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideError(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function yearKey() { return new Date().getFullYear().toString(); }
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+async function fetchPlayerData(email) {
+  if (SHEET_URL === "COLE_SUA_URL_AQUI") return null;
+  try {
+    const r = await fetch(`${SHEET_URL}?action=getPlayer&email=${encodeURIComponent(email)}`);
+    const d = await r.json();
+    return d.found ? d.data : null;
+  } catch { return null; }
+}
+
+async function savePlayerData(data) {
+  if (SHEET_URL === "COLE_SUA_URL_AQUI") return;
+  try {
+    await fetch(SHEET_URL, {
+      method:"POST",
+      body: JSON.stringify({action:"savePlayer", data}),
+    });
+  } catch {}
+}
+
+async function fetchRanking() {
+  if (SHEET_URL === "COLE_SUA_URL_AQUI") return [];
+  try {
+    const r = await fetch(`${SHEET_URL}?action=getRanking`);
+    const d = await r.json();
+    return d.ranking || [];
+  } catch { return []; }
+}
+
+async function startGame() {
+  const name = document.getElementById('inp-name').value.trim();
+  const email = document.getElementById('inp-email').value.trim();
+  hideError('home-error');
+
+  if (!name || !email) { showError('home-error','Preencha nome e e-mail.'); return; }
+  if (!/\S+@\S+\.\S+/.test(email)) { showError('home-error','E-mail inválido.'); return; }
+
+  const existing = await fetchPlayerData(email.toLowerCase());
+  const today = todayKey();
+  const plays = existing?.dailyPlays?.[today] || 0;
+
+  if (plays >= MAX_PLAYS) {
+    showError('home-error',`Você já jogou ${MAX_PLAYS} partidas hoje. Volte amanhã! 🌟`);
+    return;
+  }
+
+  state.name = name;
+  state.email = email.toLowerCase();
+  state.playerData = existing;
+  state.questions = shuffle(ALL_QUESTIONS).slice(0, QUESTIONS_PER_ROUND);
+  state.qIdx = 0;
+  state.score = 0;
+  state.streak = 0;
+  state.answers = [];
+
+  show('playing');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = state.questions[state.qIdx];
+  state.answered = false;
+  state.timeLeft = TIME_PER_Q;
+  clearInterval(state.timer);
+
+  document.getElementById('q-counter').textContent = `Pergunta ${state.qIdx+1}/${QUESTIONS_PER_ROUND}`;
+  document.getElementById('q-score').textContent = `⭐ ${state.score} pts`;
+  document.getElementById('q-text').textContent = q.q;
+
+  const sb = document.getElementById('streak-bar');
+  if (state.streak >= 3) { sb.style.display='inline-block'; sb.textContent=`🔥 Sequência de ${state.streak}!`; }
+  else sb.style.display='none';
+
+  const opts = document.getElementById('opts');
+  opts.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span style="opacity:.5;margin-right:8px">${['A','B','C','D'][i]}.</span>${opt}`;
+    div.onclick = () => handleAnswer(i);
+    opts.appendChild(div);
+  });
+
+  updateTimer();
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimer();
+    if (state.timeLeft <= 0) { clearInterval(state.timer); if (!state.answered) handleAnswer(null); }
+  }, 1000);
+}
+
+function updateTimer() {
+  const pct = (state.timeLeft / TIME_PER_Q) * 100;
+  const color = state.timeLeft > 10 ? '#00AEAE' : state.timeLeft > 5 ? '#FF9800' : '#f44336';
+  document.getElementById('q-timer').textContent = `⏱ ${state.timeLeft}s`;
+  document.getElementById('q-timer').style.background = color;
+  const bar = document.getElementById('prog');
+  bar.style.width = pct + '%';
+  bar.style.background = `linear-gradient(90deg,${color},#00AEAE)`;
+}
+
+function handleAnswer(idx) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timer);
+  const q = state.questions[state.qIdx];
+  const correct = idx === q.ans;
+  const newStreak = correct ? state.streak + 1 : 0;
+  const base = Math.round((state.timeLeft / TIME_PER_Q) * MAX_PTS);
+  const bonus = newStreak >= 3 ? STREAK_BONUS : 0;
+  const pts = correct ? Math.max(base, 10) + bonus : 0;
+
+  state.streak = newStreak;
+  state.score += pts;
+  state.answers.push({ correct, pts });
+
+  const divs = document.getElementById('opts').children;
+  for (let i = 0; i < divs.length; i++) {
+    divs[i].onclick = null;
+    if (i === q.ans) divs[i].classList.add('correct');
+    else if (i === idx) divs[i].classList.add('wrong');
+    else divs[i].classList.add('neutral');
+  }
+
+  document.getElementById('q-score').textContent = `⭐ ${state.score} pts`;
+
+  setTimeout(() => {
+    state.qIdx++;
+    if (state.qIdx >= QUESTIONS_PER_ROUND) finishGame();
+    else renderQuestion();
+  }, 1200);
+}
+
+async function finishGame() {
+  const today = todayKey();
+  const year = yearKey();
+  const ex = state.playerData || { name:state.name, email:state.email, totalScore:0, totalPlays:0, dailyPlays:{}, yearlyScore:{} };
+  const updated = {
+    ...ex,
+    name: state.name,
+    totalScore: (ex.totalScore||0) + state.score,
+    totalPlays: (ex.totalPlays||0) + 1,
+    dailyPlays: { ...ex.dailyPlays, [today]: (ex.dailyPlays?.[today]||0) + 1 },
+    yearlyScore: { ...ex.yearlyScore, [year]: (ex.yearlyScore?.[year]||0) + state.score },
+    lastPlayed: today,
+  };
+  await savePlayerData(updated);
+  state.playerData = updated;
+
+  const correct = state.answers.filter(a => a.correct).length;
+  document.getElementById('res-emoji').textContent = correct >= 8 ? '🏆' : correct >= 5 ? '🎯' : '💪';
+  document.getElementById('res-name').textContent = state.name;
+
+  const remaining = MAX_PLAYS - (updated.dailyPlays?.[today]||0);
+  document.getElementById('res-remaining').innerHTML = `Partidas restantes hoje: <b>${remaining}</b>`;
+
+  document.getElementById('res-stats').innerHTML = [
+    ['✅','Acertos',`${correct}/${QUESTIONS_PER_ROUND}`],
+    ['⭐','Pts desta partida', state.score],
+    ['🏅','Total acumulado', updated.totalScore],
+    ['🎮','Partidas jogadas', updated.totalPlays],
+  ].map(([icon,label,val]) => `
+    <div class="stat-box">
+      <div class="stat-icon">${icon}</div>
+      <div class="stat-val">${val}</div>
+      <div class="stat-label">${label}</div>
+    </div>
+  `).join('');
+
+  show('result');
+}
+
+async function showRanking() {
+  show('ranking');
+  const list = document.getElementById('rank-list');
+  list.innerHTML = '<div class="empty">Carregando ranking...</div>';
+
+  if (SHEET_URL === "COLE_SUA_URL_AQUI") {
+    list.innerHTML = '<div class="empty">⚠️ Configure a URL do Google Sheets para ver o ranking.</div>';
+    return;
+  }
+
+  const ranking = await fetchRanking();
+  const year = yearKey();
+
+  if (!ranking.length) {
+    list.innerHTML = '<div class="empty">Nenhum jogador ainda. Seja o primeiro! 🚀</div>';
+    return;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  list.innerHTML = ranking.map((p, i) => `
+    <div class="rank-row ${i<3?'top':''}">
+      <div class="rank-medal">${medals[i] || '#'+(i+1)}</div>
+      <div>
+        <div class="rank-name">${p.name}</div>
+        <div class="rank-plays">${p.totalPlays} partida${p.totalPlays!==1?'s':''}</div>
+      </div>
+      <div class="rank-pts">${(p.yearlyScore?.[year]||p.totalScore||0).toLocaleString()} pts</div>
+    </div>
+  `).join('');
+}
+
+function playAgain() {
+  document.getElementById('inp-name').value = state.name;
+  document.getElementById('inp-email').value = state.email;
+  show('home');
+}
+</script>
+</body>
+</html>
